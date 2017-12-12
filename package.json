@@ -1,0 +1,20 @@
+{
+    "name": "snake",
+    "version": "1.0.0",
+    "description": "snake game",
+    "main": "index.js",
+    "author": "zen1986@gmail.com",
+    "license": "MIT",
+    "devDependencies": {
+        "babel-cli": "^6.26.0",
+        "babel-plugin-transform-es2015-modules-systemjs": "^6.24.1",
+        "babel-preset-env": "^1.6.1"
+    },
+    "scripts": {
+        "build": "babel snake -d build",
+        "watch": "npx babel snake/**/*.js --watch --out-dir build"
+    },
+    "dependencies": {
+        "systemjs": "^0.20.19"
+    }
+}
