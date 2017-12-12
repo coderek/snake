@@ -12,7 +12,7 @@
     },
     "scripts": {
         "build": "babel snake -d build",
-        "watch": "npx babel snake/**/*.js --watch --out-dir build"
+        "watch": "npx babel snake/**/*.js --watch --out-dir build -s inline"
     },
     "dependencies": {
         "systemjs": "^0.20.19"
