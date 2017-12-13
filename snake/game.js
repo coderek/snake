@@ -1,7 +1,10 @@
-import stage from './canvas.js'; 
+import stage from './canvas.js';
 import Snake from './snake.js';
+import FoodGenertor from './food_generator.js';
+import { randInt, randChoice } from 'util.js';
 
 const TILE_COLOR = '#ddd';
+const EVENT_INTERVAL = 100; // update move every 100ms
 export const STARTED = 'started';
 export const UNINITIALIZED = 'started';
 
@@ -11,11 +14,21 @@ export default class Game {
         this.playerCount = playerCount;
         this._screen = [];
         this.snakes = [];
+        this._foodGenerator = new FoodGenertor(this);
         this.h = 50;
         this.w = 50;
         this._initPixels();
         this._initSnakes();
-        this.start();
+        this.start(  );
+    }
+
+    getRandomEmptyPixel() {
+        const x = randInt(this.h);
+        const emptyPixels = this._screen[x]
+            .map( (p, y) => [p, y])
+            .filter( tuple => tuple[0] === TILE_COLOR );
+        const randomPixel = randChoice(emptyPixels);
+        return [x, randomPixel[1]];
     }
 
     _initListeners() {
@@ -26,7 +39,7 @@ export default class Game {
 
     _initPixels() {
         for (let i=0;i<this.h;i++) {
-            this._screen.push(Array(this.w).fill(0));
+            this._screen.push(Array(this.w).fill(TILE_COLOR));
         }
     }
 
@@ -47,7 +60,10 @@ export default class Game {
 
     _render() {
         this._resetScreen();
+
         this._renderSnakes();
+        this._renderFoods();
+
         this._rasterize();
     }
 
@@ -72,6 +88,13 @@ export default class Game {
         }
     }
 
+    _renderFoods() {
+        for (let food of this._foodGenerator) {
+            const [x, y] = food.tile;
+            this._screen[x][y] = food.color;
+        }
+    }
+
     _renderSnakes() {
         for (let snake of this.snakes) {
             for (let [x, y] of snake.tiles) {
@@ -80,25 +103,34 @@ export default class Game {
         }
     }
 
+    _eatFood(x, y) {
+        return this._foodGenerator.eat(x, y);
+    }
+
     _move() {
         for (let snake of this.snakes) {
-            snake.move();
+            const [x, y] = snake.move();
+            if (this._eatFood(x, y)) {
+                snake.grow();
+            }
         }
     }
 
-    start() {
-        const that = this;
-        let lastUpdate = performance.now();
+    tick(time) {
+        this._move();
+        this._foodGenerator.generate();
+    }
 
-        function loop(time) {
-            if ( time - lastUpdate > 100 ) {
-                that._move();
-                lastUpdate = time;
+    start() {
+        this._state = STARTED;
+        const loop = (time) => {
+            if ( !this._lastUpdate || time - this._lastUpdate > EVENT_INTERVAL ) {
+                this.tick(time);
+                this._lastUpdate = time;
             }
-            that._render();
+            this._render();
             requestAnimationFrame(loop);
-        }
-        this._state = 'started';
+        };
         loop();
     }
 }

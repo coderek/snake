@@ -1,5 +1,11 @@
-export class NoMoveException extends Error {
+export class NoMoveException {
+    constructor(msg) {
+        this.message = msg;
+    }
+};
+
+export class Dead {
     constructor() {
-        super('No more move');
+        this.message = "Dead";
     }
 };
