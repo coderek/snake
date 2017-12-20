@@ -1,5 +1,5 @@
 import stage from './canvas.js';
-import Snake from './snake.js';
+import { Snake, EasySnake } from './snake.js';
 import FoodGenertor from './food_generator.js';
 import { randInt, randChoice } from 'util.js';
 
@@ -9,7 +9,7 @@ export const STARTED = 'started';
 export const UNINITIALIZED = 'started';
 
 export default class Game {
-    constructor(playerCount=1) {
+    constructor(playerCount=4) {
         this.state = UNINITIALIZED;
         this.playerCount = playerCount;
         this._screen = [];
@@ -31,6 +31,28 @@ export default class Game {
         return [x, randomPixel[1]];
     }
 
+    isInScreen(x, y) {
+        return 0<=x && x<this.h && 0<=y && y<this.w;
+    }
+
+    tick(time) {
+        this._move();
+        this._foodGenerator.generate();
+    }
+
+    start() {
+        this._state = STARTED;
+        const loop = (time) => {
+            if ( !this._lastUpdate || time - this._lastUpdate > EVENT_INTERVAL ) {
+                this.tick(time);
+                this._lastUpdate = time;
+            }
+            this._render();
+            requestAnimationFrame(loop);
+        };
+        loop();
+    }
+
     _initListeners() {
         window.addEventListener('keypress', k => {
             this.snakes[0].onKeyPressed(k.keyCode);
@@ -46,16 +68,12 @@ export default class Game {
     _initSnakes() {
         for (let i=0;i<this.playerCount;i++) {
             if (i==0) {
-                this.snakes.push(new Snake(this, false));
+                this.snakes.push(new Snake(this));
                 this._initListeners();
             } else {
-                this.snakes.push(new Snake(this, true));
+                this.snakes.push(new EasySnake(this));
             }
         }
-    }
-
-    isInScreen(x, y) {
-        return 0<=x && x<this.h && 0<=y && y<this.w;
     }
 
     _render() {
@@ -109,28 +127,20 @@ export default class Game {
 
     _move() {
         for (let snake of this.snakes) {
-            const [x, y] = snake.move();
+            if (snake.isDead) {
+                continue;
+            }
+            let x, y;
+            try {
+                [x, y] = snake.move();
+            } catch (e) {
+                snake.isDead = true;
+                continue;
+            }
+
             if (this._eatFood(x, y)) {
                 snake.grow();
             }
         }
-    }
-
-    tick(time) {
-        this._move();
-        this._foodGenerator.generate();
-    }
-
-    start() {
-        this._state = STARTED;
-        const loop = (time) => {
-            if ( !this._lastUpdate || time - this._lastUpdate > EVENT_INTERVAL ) {
-                this.tick(time);
-                this._lastUpdate = time;
-            }
-            this._render();
-            requestAnimationFrame(loop);
-        };
-        loop();
     }
 }
