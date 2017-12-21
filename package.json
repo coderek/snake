@@ -11,10 +11,48 @@
         "babel-preset-env": "^1.6.1"
     },
     "scripts": {
-        "build": "babel snake -d build",
-        "watch": "npx babel --plugins transform-regenerator snake/**/*.js --watch --out-dir build -s inline"
+        "build": "npx babel snake/**/*.js --out-dir build -s inline",
+        "watch": "npx babel snake/**/*.js --watch --out-dir build -s inline",
+        "start": "babel snake -d build && nodemon --watch server server/index.js"
     },
     "dependencies": {
+        "eslint": "^4.13.1",
+        "express": "^4.16.1",
+        "nodemon": "^1.14.1",
         "systemjs": "^0.20.19"
-    }
+    },
+	"eslintConfig": {
+		"env": {
+			"browser": true,
+			"es6": true,
+			"node": true
+		},
+		"extends": "eslint:recommended",
+		"parserOptions": {
+			"sourceType": "module"
+		},
+		"rules": {
+			"indent": [
+				"error",
+				4
+			],
+			"linebreak-style": [
+				"error",
+				"unix"
+			],
+			"quotes": [
+				"error",
+				"single"
+			],
+			"semi": [
+				"error",
+				"always"
+			],
+			"no-console": 0
+		},
+		"globals": {
+			"require": true,
+			"console": true
+		}
+	}
 }
