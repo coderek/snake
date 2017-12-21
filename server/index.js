@@ -19,25 +19,23 @@ class PlayerConnection {
 //     }
 // }
 
-
-'use strict';
-
-const express = require('express');
-const path = require('path');
-
-// Constants
-const PORT = 8080;
-const HOST = '0.0.0.0';
-
-// App
-const app = express();
-app.get('/', (req, res) => {
-    res.send('Hello fdduck\n');
-});
+var path = require('path');
+var express = require('express');
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+var port = process.env.PORT || 8080;
 
 app.use(express.static(path.normalize(path.join(__dirname, '..', 'build'))));
 app.use(express.static(path.normalize(path.join(__dirname, '..', 'node_modules'))));
 
 
-app.listen(PORT, HOST);
-console.log(`Running on http://${HOST}:${PORT}`);
+io.on('connection', function(socket){
+  socket.on('chat message', function(msg){
+    io.emit('chat message', msg);
+  });
+});
+
+http.listen(port, function(){
+  console.log('listening on *:' + port);
+});

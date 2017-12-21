@@ -58,7 +58,7 @@ export default class Game {
     }
 
     _initListeners() {
-        window.addEventListener('keypress', k => {
+        window.addEventListener('keydown', k => {
             this.snakes[0].onKeyPressed(k.keyCode);
         });
     }

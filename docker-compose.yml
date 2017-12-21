@@ -1,12 +1,12 @@
 version: '3'
 
 services:
-    web:
+    snake:
         build: .
         command: npm start
         volumes:
             - .:/usr/src/app
         ports:
-            - "49160:8080"
+            - "43211:8080"
 
 
