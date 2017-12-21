@@ -4,19 +4,19 @@ import FoodGenertor from './food_generator.js';
 import { randInt, randChoice } from 'util.js';
 
 const TILE_COLOR = '#ddd';
-const EVENT_INTERVAL = 100; // update move every 100ms
+const EVENT_INTERVAL = 200; // update move every 100ms
 export const STARTED = 'started';
 export const UNINITIALIZED = 'started';
 
 export default class Game {
-    constructor(playerCount=4) {
+    constructor(playerCount=2) {
         this.state = UNINITIALIZED;
         this.playerCount = playerCount;
         this._screen = [];
         this.snakes = [];
         this._foodGenerator = new FoodGenertor(this);
-        this.h = 50;
-        this.w = 50;
+        this.h = 20;
+        this.w = 20;
         this._initPixels();
         this._initSnakes();
         this.start(  );
@@ -51,6 +51,10 @@ export default class Game {
             requestAnimationFrame(loop);
         };
         loop();
+    }
+
+    foodCoords() {
+        return [...this._foodGenerator].map( food => food.tile );
     }
 
     _initListeners() {
@@ -115,8 +119,13 @@ export default class Game {
 
     _renderSnakes() {
         for (let snake of this.snakes) {
-            for (let [x, y] of snake.tiles) {
-                this._screen[x][y] = snake.color;
+            for (let i=0;i<snake.tiles.length;i++) {
+                const [x, y] = snake.tiles[i];
+                if (i === 0) {
+                    this._screen[x][y] = 'red';
+                } else {
+                    this._screen[x][y] = snake.color;
+                }
             }
         }
     }
@@ -134,6 +143,7 @@ export default class Game {
             try {
                 [x, y] = snake.move();
             } catch (e) {
+                console.log(`Snake ${snake._id} is dead`);
                 snake.isDead = true;
                 continue;
             }
