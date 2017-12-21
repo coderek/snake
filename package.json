@@ -13,7 +13,8 @@
     "scripts": {
         "build": "npx babel snake/**/*.js --out-dir build -s inline",
         "watch": "npx babel snake/**/*.js --watch --out-dir build -s inline",
-        "start": "babel snake -d build && nodemon --watch server server/index.js"
+		"server": "nodemon --legacy-watch server server/index.js",
+        "start": "npm run build && npm run server"
     },
     "dependencies": {
         "eslint": "^4.13.1",

@@ -32,7 +32,7 @@ const HOST = '0.0.0.0';
 // App
 const app = express();
 app.get('/', (req, res) => {
-    res.send('Hello worldddd\n');
+    res.send('Hello fdduck\n');
 });
 
 app.use(express.static(path.normalize(path.join(__dirname, '..', 'build'))));
