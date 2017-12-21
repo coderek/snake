@@ -53,7 +53,7 @@ function TileMapFactory( sid ) {
 export class Snake {
     constructor(game) {
         this._id = _idGenerator ++;
-        this._len = 15;
+        this._len = 5;
         this._game = game;
         this._tiles = TileMapFactory(this._id);
         this._init();
@@ -85,7 +85,7 @@ export class Snake {
     }
 
     move() {
-        let nx, ny = this._findNextMove(...this._tiles[0]);
+        let [nx, ny] = this._findNextMove(...this._tiles[0]);
         this._lastPopped = this._tiles.pop();
         this._tiles.unshift([nx, ny]);
         return [nx, ny];
@@ -115,7 +115,7 @@ export class Snake {
     _findNextMove(sx, sy) {
         let d;
         if (this._keyPressed == null && this._lastDir == null) {
-            this._lastDir = this._getRandDir(sx, sy);
+            d = this._lastDir = this._getRandDir(sx, sy);
         } else if (this._keyPressed != null) {
             d = KEYCODE[this._keyPressed];
             // do nothing when it's towards the opposite direction
@@ -131,7 +131,7 @@ export class Snake {
         }
 
         const [nx, ny] = [sx + dir[d], sy + dir[d+1]];
-        if (this._game.isInScreen(nx, ny)) {
+        if (this._isValidMove(nx, ny)) {
             return [nx, ny];
         }
         throw new Dead;
@@ -172,7 +172,29 @@ class AISnake extends Snake {
     }
 
     // return dir
-    _race() {
+    _race(x, y, tx, ty) {
+        if (x===tx && ty===y) {
+            return this._getRandDir(x, y);
+        }
+        let moves = [];
+        if (y!==ty) {
+            moves.push(ty>y? 1: 3);
+        }
+        if (x!==tx) {
+            moves.push(tx>x? 2: 0);
+        }
+        moves = shuffle(moves);
+        for (let i=0;i<4;i++) {
+            if (moves.indexOf(i) === -1) {
+                moves.push(i);
+            }
+        }
+        for (let i of moves) {
+            const [nx, ny] = [x + dir[i], y + dir[i+1]]
+            if (this._isValidMove(nx, ny))
+                return i;
+        }
+        throw new NoMoveException;
     }
 }
 
@@ -186,13 +208,50 @@ export class EasySnake extends AISnake {
         return super.move();
     }
 
+    _isSmartMove(x, y) {
+        const selfLen = this._tiles.length;
+        const borders = new Set();
+        const visited = new Set();
+        const q = [[x, y]];
+
+        while (q.length) {
+            const l = q.length;
+
+            for (let j=0;j<l;j++) {
+                const p = q.shift();
+                const [fx, fy] = p;
+                for (let i=0;i<4;i++) {
+                    const [nx, ny] = [fx+dir[i], fy+dir[i+1]];
+                    const hash = tileHash(nx, ny);
+                    if (visited.has(hash)) {
+                        continue;
+                    }
+                    visited.add(hash);
+                    if (this._isValidMove(nx, ny)) {
+                        q.push([nx, ny]);
+                    }
+                }
+            }
+            if (q.length > selfLen) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     _findNextMove(sx, sy, call=0) {
-        if (call >= 4) {
+        if (call >= 100) {
             throw new Dead;
         }
-        const d = this._patrol(sx, sy);
+        const foods = this._game.foodCoords();
+        let d;
+        // if (foods.length) {
+        //     d = this._race(sx, sy, foods[0][0], foods[0][1]);
+        // } else {
+            d = this._patrol(sx, sy);
+        // }
         const coords = [sx + dir[d], sy + dir[d+1]];
-        if (this._isValidMove(...coords)) {
+        if (this._isValidMove(...coords) && this._isSmartMove(...coords)) {
             return coords;
         } else {
             return this._findNextMove(sx, sy, ++call);
