@@ -1,4 +1,4 @@
-import { STARTED, UNINITIALIZED } from './game.js';
+import { STARTED, UNINITIALIZED, PAUSED, FINISHED } from './constants.js';
 import { randInt, shuffle, range } from './util.js';
 import { Dead, NoMoveException } from './exceptions.js';
 

@@ -2,15 +2,14 @@ import stage from './canvas.js';
 import { Snake, EasySnake } from './snake.js';
 import FoodGenertor from './food_generator.js';
 import { randInt, randChoice } from 'util.js';
+import { STARTED, UNINITIALIZED, PAUSED, FINISHED } from './constants.js';
 
 const TILE_COLOR = '#ddd';
 const EVENT_INTERVAL = 200; // update move every 100ms
-export const STARTED = 'started';
-export const UNINITIALIZED = 'started';
 
 export default class Game {
     constructor(playerCount=2) {
-        this.state = UNINITIALIZED;
+        this._state = UNINITIALIZED;
         this.playerCount = playerCount;
         this._screen = [];
         this.snakes = [];
@@ -19,7 +18,18 @@ export default class Game {
         this.w = 20;
         this._initPixels();
         this._initSnakes();
-        this.start(  );
+        this._setup();
+        console.log('game start');
+    }
+
+    onGameStart() {
+        this.start();
+    }
+
+    onPaused() {
+    }
+
+    onFinished() {
     }
 
     getRandomEmptyPixel() {
@@ -55,6 +65,11 @@ export default class Game {
 
     foodCoords() {
         return [...this._foodGenerator].map( food => food.tile );
+    }
+
+    _setup() {
+        this._resetScreen();
+        this._rasterize();
     }
 
     _initListeners() {

@@ -23,4 +23,19 @@ export function range(n) {
     return ret;
 }
 
-
+export function camelize(s) {
+    const ret = [];
+    let lastIsCh = true;
+    for (let c of s.toLowerCase()) {
+        if (/[a-zA-Z0-0]/.test(c)) {
+            ret.push(c);
+            if (!lastIsCh) {
+                ret.push(ret.pop().toUpperCase());
+            }
+            lastIsCh = true;
+        } else {
+            lastIsCh = false;
+        }
+    }
+    return ret.join('');
+}

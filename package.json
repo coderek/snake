@@ -9,7 +9,7 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-es2015-modules-systemjs": "^6.24.1",
     "babel-preset-env": "^1.6.1",
-    "nodemon": "^1.14.1"
+    "nodemon": "^1.14.2"
   },
   "scripts": {
     "build": "npx babel snake/**/*.js --out-dir build -s inline",
@@ -18,13 +18,13 @@
     "start": "npm run build && npm run server"
   },
   "dependencies": {
+    "eslint": "^4.13.1",
     "express": "^4.15.2",
     "socket.io": "^1.7.3",
-    "eslint": "^4.13.1",
-    "nodemon": "^1.14.1",
     "socket.io-client": "^2.0.4",
     "socket.io-redis": "^5.2.0",
-    "systemjs": "^0.20.19"
+    "systemjs": "^0.20.19",
+    "vuejs": "^2.0.19"
   },
   "eslintConfig": {
     "env": {
