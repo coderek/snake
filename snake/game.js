@@ -3,7 +3,7 @@ import stage from './canvas.js';
 import { GameOver } from './exceptions.js';
 import { Snake, EasySnake } from './snake.js';
 import FoodGenertor from './food_generator.js';
-import { randInt, randChoice } from 'util.js';
+import { randInt, randChoice, guid } from 'util.js';
 import { STARTED, UNINITIALIZED, PAUSED, FINISHED, GAME_OVER, GAME_SCORE } from './constants.js';
 
 const TILE_COLOR = '#ddd';
@@ -11,6 +11,7 @@ const EVENT_INTERVAL = 200; // update move every 100ms
 
 export default class Game {
     constructor(playerCount=2, width=20, height=20) {
+        this.id = guid();
         this._state = UNINITIALIZED;
         this.playerCount = playerCount;
         this._screen = [];
@@ -78,7 +79,7 @@ export default class Game {
     }
 
     finish() {
-        messageBus.broadcast(GAME_OVER);
+        messageBus.broadcast(GAME_OVER, this.id);
     }
 
     reset() {

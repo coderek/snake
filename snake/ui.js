@@ -52,6 +52,7 @@ const scoreBoard = new Vue({
     },
     computed: {
         records: {
+            cache: false,
             get() {
                 return this.sortedRecords(this._records).slice(0, NUM_OF_PERSONAL_BEST_TO_SHOW);
             },
@@ -93,12 +94,13 @@ const scoreBoard = new Vue({
             }
             updateTime();
         },
-        onGameOver() {
+        onGameOver(id) {
             gameRunning = false;
-            this.records.push({
+            this.records = this.records.concat({
                 score: this.points,
                 time: this.time,
-                efficiency: this.efficiency
+                efficiency: this.efficiency,
+                id: id
             });
             localStorage.setItem('records', JSON.stringify(this.records));
         }

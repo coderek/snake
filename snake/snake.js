@@ -1,5 +1,5 @@
 import { STARTED, UNINITIALIZED, PAUSED, FINISHED } from './constants.js';
-import { randInt, shuffle, range } from './util.js';
+import { guid, randInt, shuffle, range } from './util.js';
 import { Dead, NoMoveException } from './exceptions.js';
 
 const dir = [-1, 0, 1, 0, -1];
@@ -19,7 +19,6 @@ const COLORS = [
     '#00308F',
 ];
 
-let _idGenerator = 1;
 const _tileMap = {};
 const tileHash = (x, y) => x * 100000000 + y;
 
@@ -49,10 +48,12 @@ function TileMapFactory( sid ) {
     });
 }
 
+let seq = 0;
 
 export class Snake {
     constructor(game) {
-        this._id = _idGenerator ++;
+        this.id = guid();
+        this._id = seq++;
         this._len = 5;
         this._game = game;
         this._tiles = TileMapFactory(this._id);

@@ -16,8 +16,8 @@
             <div class="col">
                 <div class="row">
                     <div id="container" style="width:400px;"></div>
-                    <div id="side-menu" v-cloak>
-                        <dl>
+                    <div id="side-menu" v-cloak class="col">
+                        <dl class="col">
                             <dt>Points</dt>
                             <dd>{{points}}</dd>
 
@@ -38,7 +38,7 @@
                                 <td>Time</td>
                                 <td>Efficiency</td>
                             </tr>
-                            <tr v-for="record of records">
+                            <tr v-for="record of records" :key="records.id">
                                 <td>{{record.score}}</td>
                                 <td>{{record.time}}</td>
                                 <td>{{record.efficiency}}</td>

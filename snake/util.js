@@ -39,3 +39,18 @@ export function camelize(s) {
     }
     return ret.join('');
 }
+
+export function guid() {
+    const timestamp = Date.now();
+    const id = [];
+    for (let i=0;i<10;i++) {
+        // only small letter and digit
+        const r = randInt(36);
+        if (r>=26) {
+            id.push(r-26);
+        } else {
+            id.push(String.fromCharCode(r + 'a'.charCodeAt(0)));
+        }
+    }
+    return id.join('') + ':' + timestamp;
+};
