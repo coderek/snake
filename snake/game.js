@@ -1,7 +1,7 @@
 import messageBus from './message.js'; 
 import stage from './canvas.js';
 import { GameOver } from './exceptions.js';
-import { Snake, EasySnake } from './snake.js';
+import { AISnakeFactory, Snake } from './snake.js';
 import FoodGenertor from './food_generator.js';
 import { randInt, randChoice, guid } from 'util.js';
 import { STARTED, UNINITIALIZED, PAUSED, FINISHED, GAME_OVER, GAME_SCORE } from './constants.js';
@@ -23,7 +23,8 @@ export default class Game {
         console.log('game start');
     }
 
-    onGameStart() {
+    onGameStart(difficulty) {
+        this._difficulty = difficulty || 'easy';
         this.reset();
         this.start();
     }
@@ -119,7 +120,7 @@ export default class Game {
             if (i==0) {
                 this.snakes.push(new Snake(this));
             } else {
-                this.snakes.push(new EasySnake(this));
+                this.snakes.push(AISnakeFactory(this));
             }
         }
     }

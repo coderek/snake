@@ -202,17 +202,6 @@ class AISnake extends Snake {
         }
         throw new NoMoveException;
     }
-}
-
-export class EasySnake extends AISnake {
-    constructor() {
-        super(...arguments);
-        console.log('AI snake');
-    }
-
-    move () {
-        return super.move();
-    }
 
     _isSmartMove(x, y) {
         const selfLen = this._tiles.length;
@@ -250,12 +239,7 @@ export class EasySnake extends AISnake {
             throw new Dead;
         }
         const foods = this._game.foodCoords();
-        let d;
-        // if (foods.length) {
-        //     d = this._race(sx, sy, foods[0][0], foods[0][1]);
-        // } else {
-            d = this._patrol(sx, sy);
-        // }
+        const d = this._strategy(sx, sy, foods);
         const coords = [sx + dir[d], sy + dir[d+1]];
         if (this._isValidMove(...coords) && this._isSmartMove(...coords)) {
             return coords;
@@ -263,4 +247,66 @@ export class EasySnake extends AISnake {
             return this._findNextMove(sx, sy, ++call);
         }
     }
+
 }
+
+class HardSnake extends AISnake {
+    constructor() {
+        super(...arguments);
+        console.log('Easy AI snake');
+    }
+
+    _strategy(sx, sy, foods) {
+        if (foods.length) {
+            return this._race(sx, sy, foods[0][0], foods[0][1]);
+        } else {
+            return this._patrol(sx, sy);
+        }
+    }
+}
+
+class MediumSnake extends AISnake {
+    constructor() {
+        super(...arguments);
+        console.log('Easy AI snake');
+    }
+
+    _isNearBy(sx, sy, foods) {
+        const food = foods[0];
+        if (!food) 
+            return false;
+
+        return Math.abs(food[0]-sx) + Math.abs(food[1]-sy) < 10;
+
+    }
+
+    _strategy(sx, sy, foods) {
+        if (this._isNearBy(...arguments)) {
+            return this._race(sx, sy, foods[0][0], foods[0][1]);
+        } else {
+            return this._patrol(sx, sy);
+        }
+    }
+}
+
+class EasySnake extends AISnake {
+    constructor() {
+        super(...arguments);
+        console.log('Easy AI snake');
+    }
+
+    _strategy(sx, sy) {
+        return this._patrol(sx, sy);
+    }
+}
+
+export function AISnakeFactory(game) {
+    switch (game._difficulty)  {
+        case 'easy':
+            return new EasySnake(game);
+        case 'medium':
+            return new MediumSnake(game);
+        case 'hard':
+            return new HardSnake(game);
+    }
+};
