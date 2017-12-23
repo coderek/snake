@@ -14,10 +14,37 @@
     <body>
         <div id="main" class="row">
             <div class="col">
-                <!-- <div id="top-menu">Snake</div> -->
                 <div class="row">
                     <div id="container" style="width:400px;"></div>
-                    <div id="side-menu"></div>
+                    <div id="side-menu" v-cloak>
+                        <dl>
+                            <dt>Points</dt>
+                            <dd>{{points}}</dd>
+
+                            <br>
+                            
+                            <dt>Time</dt>
+                            <dd>{{time}}</dd>
+
+                            <br>
+
+                            <dt>Efficiency</dt>
+                            <dd>{{efficiency}}</dd>
+                        </dl>
+
+                        <table>
+                            <tr>
+                                <td>Score</td>
+                                <td>Time</td>
+                                <td>Efficiency</td>
+                            </tr>
+                            <tr v-for="record of records">
+                                <td>{{record.score}}</td>
+                                <td>{{record.time}}</td>
+                                <td>{{record.efficiency}}</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
                 <div id="start-game" class="popup" v-cloak >
                     <div class="row">

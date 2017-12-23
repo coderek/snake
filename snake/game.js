@@ -4,7 +4,7 @@ import { GameOver } from './exceptions.js';
 import { Snake, EasySnake } from './snake.js';
 import FoodGenertor from './food_generator.js';
 import { randInt, randChoice } from 'util.js';
-import { STARTED, UNINITIALIZED, PAUSED, FINISHED, GAME_OVER } from './constants.js';
+import { STARTED, UNINITIALIZED, PAUSED, FINISHED, GAME_OVER, GAME_SCORE } from './constants.js';
 
 const TILE_COLOR = '#ddd';
 const EVENT_INTERVAL = 200; // update move every 100ms
@@ -196,6 +196,9 @@ export default class Game {
 
             if (this._eatFood(x, y)) {
                 snake.grow();
+                if (snake === this.snakes[0]) {
+                    messageBus.broadcast(GAME_SCORE);
+                }
             }
         }
     }
