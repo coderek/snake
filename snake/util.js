@@ -27,7 +27,7 @@ export function camelize(s) {
     const ret = [];
     let lastIsCh = true;
     for (let c of s.toLowerCase()) {
-        if (/[a-zA-Z0-0]/.test(c)) {
+        if (/[a-zA-Z0-9]/.test(c)) {
             ret.push(c);
             if (!lastIsCh) {
                 ret.push(ret.pop().toUpperCase());

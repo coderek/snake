@@ -43,4 +43,8 @@ export default class FoodGenertor {
         }
         return false;
     }
+
+    dispose() {
+        this._current = new Map();
+    }
 }

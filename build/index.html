@@ -19,13 +19,21 @@
                     <div id="container" style="width:400px;"></div>
                     <div id="side-menu"></div>
                 </div>
-                <div id="popup">
+                <div id="start-game" class="popup" v-cloak >
                     <div class="row">
                         <div class="col" style="width: 300px;">
                             <h3>Start a new game</h3>
                             <button @click="start('easy')">Easy</button>
                             <button @click="start('medium')">Medium</button>
                             <button @click="start('hard')">Hard</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="end-game" class="popup" v-cloak>
+                    <div class="row">
+                        <div class="col" style="width: 300px;">
+                            <h3>You are dead!</h3>
+                            <button @click="showStart()">Start another game</button>
                         </div>
                     </div>
                 </div>

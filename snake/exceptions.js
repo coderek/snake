@@ -9,3 +9,9 @@ export class Dead {
         this.message = "Dead";
     }
 };
+
+export class GameOver {
+    constructor() {
+        this.message = "Game over";
+    }
+}

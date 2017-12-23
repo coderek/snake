@@ -1,28 +1,29 @@
+import messageBus from './message.js'; 
 import stage from './canvas.js';
+import { GameOver } from './exceptions.js';
 import { Snake, EasySnake } from './snake.js';
 import FoodGenertor from './food_generator.js';
 import { randInt, randChoice } from 'util.js';
-import { STARTED, UNINITIALIZED, PAUSED, FINISHED } from './constants.js';
+import { STARTED, UNINITIALIZED, PAUSED, FINISHED, GAME_OVER } from './constants.js';
 
 const TILE_COLOR = '#ddd';
 const EVENT_INTERVAL = 200; // update move every 100ms
 
 export default class Game {
-    constructor(playerCount=2) {
+    constructor(playerCount=2, width=20, height=20) {
         this._state = UNINITIALIZED;
         this.playerCount = playerCount;
         this._screen = [];
-        this.snakes = [];
-        this._foodGenerator = new FoodGenertor(this);
-        this.h = 20;
-        this.w = 20;
+        this.h = height;
+        this.w = width;
         this._initPixels();
-        this._initSnakes();
-        this._setup();
+
+        this._initialRender();
         console.log('game start');
     }
 
     onGameStart() {
+        this.reset();
         this.start();
     }
 
@@ -30,6 +31,11 @@ export default class Game {
     }
 
     onFinished() {
+    }
+
+    onKeyDown(k) {
+        if (this.snakes && this.snakes.length)
+            this.snakes[0].onKeyPressed(k.keyCode);
     }
 
     getRandomEmptyPixel() {
@@ -54,7 +60,15 @@ export default class Game {
         this._state = STARTED;
         const loop = (time) => {
             if ( !this._lastUpdate || time - this._lastUpdate > EVENT_INTERVAL ) {
-                this.tick(time);
+                try {
+                    this.tick(time);
+                } catch (e) {
+                    if ( e instanceof GameOver ) {
+                        this._render();
+                        this.finish();
+                        return;
+                    }
+                }
                 this._lastUpdate = time;
             }
             this._render();
@@ -63,19 +77,30 @@ export default class Game {
         loop();
     }
 
+    finish() {
+        messageBus.broadcast(GAME_OVER);
+    }
+
+    reset() {
+        this._initPixels();
+        this._initSnakes();
+        this._initFoodGenerator();
+    }
+
     foodCoords() {
         return [...this._foodGenerator].map( food => food.tile );
     }
 
-    _setup() {
+    _initialRender() {
         this._resetScreen();
         this._rasterize();
     }
 
-    _initListeners() {
-        window.addEventListener('keydown', k => {
-            this.snakes[0].onKeyPressed(k.keyCode);
-        });
+    _initFoodGenerator() {
+        if (this._foodGenerator) {
+            this._foodGenerator.dispose();
+        }
+        this._foodGenerator = new FoodGenertor(this);
     }
 
     _initPixels() {
@@ -85,10 +110,13 @@ export default class Game {
     }
 
     _initSnakes() {
+        if (this.snakes && this.snakes.length) {
+            this.snakes.forEach( s => s.dispose() );
+        }
+        this.snakes = [];
         for (let i=0;i<this.playerCount;i++) {
             if (i==0) {
                 this.snakes.push(new Snake(this));
-                this._initListeners();
             } else {
                 this.snakes.push(new EasySnake(this));
             }
@@ -136,7 +164,7 @@ export default class Game {
         for (let snake of this.snakes) {
             for (let i=0;i<snake.tiles.length;i++) {
                 const [x, y] = snake.tiles[i];
-                if (i === 0) {
+                if (snake === this.snakes[0] && i === 0) {
                     this._screen[x][y] = 'red';
                 } else {
                     this._screen[x][y] = snake.color;
@@ -152,6 +180,9 @@ export default class Game {
     _move() {
         for (let snake of this.snakes) {
             if (snake.isDead) {
+                if (snake === this.snakes[0]) {
+                    throw new GameOver();
+                }
                 continue;
             }
             let x, y;

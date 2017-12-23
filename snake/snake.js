@@ -65,7 +65,7 @@ export class Snake {
     }
 
     get color() {
-        return COLORS[this._id];
+        return COLORS[this._id%COLORS.length];
     }
 
     get isDead() {
@@ -78,6 +78,11 @@ export class Snake {
 
     onKeyPressed(key) {
         this._keyPressed = key;
+    }
+
+    dispose() {
+        while (this._tiles.length) 
+            this._tiles.pop();
     }
 
     grow() {
