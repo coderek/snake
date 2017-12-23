@@ -4,6 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width" />
         <title>Snake Game</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Bungee|Risque|Roboto" rel="stylesheet">
         <style>
             canvas {
                 background-color: #eee;
@@ -18,27 +20,34 @@
                     <div id="container" style="width:400px;"></div>
                     <div id="side-menu" v-cloak class="col">
                         <dl class="col">
-                            <dt>Points</dt>
-                            <dd>{{points}}</dd>
+                            <div class="row">
+                                <dt>Difficulty</dt>
+                                <dd>{{difficulty}}</dd>
+                            </div>
 
-                            <br>
+                            <div class="row">
+                                <dt>Points</dt>
+                                <dd>{{points}}</dd>
+                            </div>
                             
-                            <dt>Time</dt>
-                            <dd>{{time}}</dd>
+                            <div class="row">
+                                <dt>Time</dt>
+                                <dd>{{time}}</dd>
+                            </div>
 
-                            <br>
-
-                            <dt>Efficiency</dt>
-                            <dd>{{efficiency}}</dd>
+                            <div class="row">
+                                <dt>Efficiency</dt>
+                                <dd>{{efficiency}}</dd>
+                            </div>
                         </dl>
 
-                        <table>
+                        <table v-if="records.length > 0">
                             <tr>
                                 <td>Score</td>
                                 <td>Time</td>
                                 <td>Efficiency</td>
                             </tr>
-                            <tr v-for="record of records" :key="records.id">
+                            <tr v-for="record of records" :key="record.id">
                                 <td>{{record.score}}</td>
                                 <td>{{record.time}}</td>
                                 <td>{{record.efficiency}}</td>

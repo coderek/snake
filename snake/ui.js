@@ -1,5 +1,6 @@
 import messageBus from './message.js'; 
 import { GAME_START, GAME_OVER, GAME_SCORE } from './constants.js';
+import ResultsManager from './results.js';
 import { NUM_OF_PERSONAL_BEST_TO_SHOW } from './config.js';
 
 const startGame = new Vue({
@@ -7,12 +8,16 @@ const startGame = new Vue({
     mounted() {
         show(this);
     },
+    data: {
+        difficulty: null
+    },
     methods: {
         start(difficulty) {
             messageBus.broadcast(
                 GAME_START,
                 difficulty
             );
+            this.difficulty = difficulty;
             hide(this);
         }
     }
@@ -39,44 +44,35 @@ const endGame = new Vue({
 
 let lastStoppedTime = null;
 let gameRunning = false;
+const records = new ResultsManager();
 const scoreBoard = new Vue({
     el: '#side-menu',
     data: {
         points: 0,
-        time: 0,
-        _records: []
+        time: 0
     },
     created() {
         lastStoppedTime = Date.now();
-        this.records = JSON.parse(localStorage.records);
     },
     computed: {
+        efficiency () {
+            if (this.time === 0) return 0;
+            return (this.points*100/this.time).toFixed(1);
+        },
+        difficulty: {
+            cache: false,
+            get() {
+                return startGame.difficulty;
+            }
+        },
         records: {
             cache: false,
             get() {
-                return this.sortedRecords(this._records).slice(0, NUM_OF_PERSONAL_BEST_TO_SHOW);
-            },
-            set(rds) {
-                this._records = rds || [];
+                return records.get(this.difficulty);
             }
-        },
-        efficiency () {
-            if (this.time === 0) return 0;
-            return (this.points/this.time).toFixed(1);
         }
     },
     methods: {
-        sortedRecords(rds) {
-            return rds.sort((a,b)=> {
-                if (b.score - a.score !== 0 ) {
-                    return b.score - a.score
-                }
-                if (a.time - b.time !== 0) {
-                    return a.time - b.time;
-                }
-                return 0;
-            });
-        },
         onGameScore() {
             this.points++;
         },
@@ -94,15 +90,14 @@ const scoreBoard = new Vue({
             }
             updateTime();
         },
-        onGameOver(id) {
+        onGameOver(gameInfo) {
             gameRunning = false;
-            this.records = this.records.concat({
-                score: this.points,
-                time: this.time,
-                efficiency: this.efficiency,
-                id: id
-            });
-            localStorage.setItem('records', JSON.stringify(this.records));
+            if (records.length < NUM_OF_PERSONAL_BEST_TO_SHOW || this.points)
+                records.push(Object.assign(gameInfo, {
+                    score: this.points,
+                    time: this.time,
+                    efficiency: this.efficiency
+                }));
         }
     }
 });

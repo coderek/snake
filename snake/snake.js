@@ -1,6 +1,7 @@
 import { STARTED, UNINITIALIZED, PAUSED, FINISHED } from './constants.js';
 import { guid, randInt, shuffle, range } from './util.js';
 import { Dead, NoMoveException } from './exceptions.js';
+import ReactiveArrayFactory from './reactive_array.js';
 
 const dir = [-1, 0, 1, 0, -1];
 const KEYCODE = {
@@ -23,27 +24,14 @@ const _tileMap = {};
 const tileHash = (x, y) => x * 100000000 + y;
 
 function TileMapFactory( sid ) {
-    const tiles = [];
-    return new Proxy(tiles, {
-        get(target, prop) {
-            const val = target[prop];
-            if (typeof val === 'function') {
-                if (['push', 'unshift'].includes(prop)) {
-                    return function (el) {
-                        _tileMap[tileHash(...el)] = sid;
-                        return Array.prototype[prop].apply(target, arguments);
-                    }
-                }
-                if (['pop'].includes(prop)) {
-                    return function () {
-                        const el = Array.prototype[prop].apply(target, arguments);
-                        delete _tileMap[tileHash(...el)];
-                        return el;
-                    }
-                }
-                return val.bind(target);
-            }
-            return val;
+    const additionCallback = el => _tileMap[tileHash(...el)] = sid;
+    const removalCallback = el => delete _tileMap[tileHash(...el)];
+
+    return ReactiveArrayFactory({
+        push: additionCallback,
+        unshift: additionCallback,
+        pop: {
+            post: removalCallback
         }
     });
 }

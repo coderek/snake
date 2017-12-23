@@ -7,10 +7,10 @@ import { randInt, randChoice, guid } from 'util.js';
 import { STARTED, UNINITIALIZED, PAUSED, FINISHED, GAME_OVER, GAME_SCORE } from './constants.js';
 
 const TILE_COLOR = '#ddd';
-const EVENT_INTERVAL = 200; // update move every 100ms
+const EVENT_INTERVAL = 100; // update move every 100ms
 
 export default class Game {
-    constructor(playerCount=2, width=20, height=20) {
+    constructor(playerCount=2, width=40, height=40) {
         this.id = guid();
         this._state = UNINITIALIZED;
         this.playerCount = playerCount;
@@ -80,7 +80,10 @@ export default class Game {
     }
 
     finish() {
-        messageBus.broadcast(GAME_OVER, this.id);
+        messageBus.broadcast(GAME_OVER, {
+            id: this.id,
+            difficulty: this._difficulty
+        });
     }
 
     reset() {
