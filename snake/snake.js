@@ -1,9 +1,7 @@
 import { STARTED, UNINITIALIZED, PAUSED, FINISHED } from './constants.js';
 import { guid, randInt, shuffle, range } from './util.js';
 import { Dead, NoMoveException } from './exceptions.js';
-import ReactiveArrayFactory from './reactive_array.js';
-
-const dir = [-1, 0, 1, 0, -1];
+import ReactiveArrayFactory from './reactive_array.js'; const dir = [-1, 0, 1, 0, -1];
 const KEYCODE = {
     37: 3, // 'ArrowLeft',
     38: 0, // 'ArrowUp',
@@ -106,10 +104,29 @@ export class Snake {
         return this._tiles.some( t => t[0] === x && t[1] === y);
     }
 
+    _getDir(from, to) {
+        // from and to are connected and not overlap
+        const [fx, fy] = from;
+        const [tx, ty] = to;
+        if (fx === tx) {
+            if (fy > tx) {
+                return 3;
+            } else {
+                return 1;
+            }
+        } else {
+            if (fx > tx) {
+                return 0;
+            } else {
+                return 2;
+            }
+        }
+    }
+
     _findNextMove(sx, sy) {
         let d;
         if (this._keyPressed == null && this._lastDir == null) {
-            d = this._lastDir = this._getRandDir(sx, sy);
+            d = this._lastDir = this._getDir(this._tiles[1], this._tiles[0]);
         } else if (this._keyPressed != null) {
             d = KEYCODE[this._keyPressed];
             // do nothing when it's towards the opposite direction
@@ -227,7 +244,12 @@ class AISnake extends Snake {
             throw new Dead;
         }
         const foods = this._game.foodCoords();
-        const d = this._strategy(sx, sy, foods);
+        let d;
+        if (this._isNearBy(sx, sy, foods)) {
+            d = this._race(sx, sy, foods[0][0], foods[0][1]);
+        } else {
+            d = this._patrol(sx, sy);
+        }
         const coords = [sx + dir[d], sy + dir[d+1]];
         if (this._isValidMove(...coords) && this._isSmartMove(...coords)) {
             return coords;
@@ -236,20 +258,22 @@ class AISnake extends Snake {
         }
     }
 
+    _isNearBy(sx, sy, foods) {
+        const food = foods[0];
+        if (!food) 
+            return false;
+
+        return Math.abs(food[0]-sx) + Math.abs(food[1]-sy) < this._nearByThreshold;
+
+    }
+
 }
 
 class HardSnake extends AISnake {
     constructor() {
         super(...arguments);
         console.log('Easy AI snake');
-    }
-
-    _strategy(sx, sy, foods) {
-        if (foods.length) {
-            return this._race(sx, sy, foods[0][0], foods[0][1]);
-        } else {
-            return this._patrol(sx, sy);
-        }
+        this._nearByThreshold = 10000;
     }
 }
 
@@ -257,23 +281,7 @@ class MediumSnake extends AISnake {
     constructor() {
         super(...arguments);
         console.log('Easy AI snake');
-    }
-
-    _isNearBy(sx, sy, foods) {
-        const food = foods[0];
-        if (!food) 
-            return false;
-
-        return Math.abs(food[0]-sx) + Math.abs(food[1]-sy) < 10;
-
-    }
-
-    _strategy(sx, sy, foods) {
-        if (this._isNearBy(...arguments)) {
-            return this._race(sx, sy, foods[0][0], foods[0][1]);
-        } else {
-            return this._patrol(sx, sy);
-        }
+        this._nearByThreshold = this._game.h / 2;
     }
 }
 
@@ -281,10 +289,7 @@ class EasySnake extends AISnake {
     constructor() {
         super(...arguments);
         console.log('Easy AI snake');
-    }
-
-    _strategy(sx, sy) {
-        return this._patrol(sx, sy);
+        this._nearByThreshold = 0;
     }
 }
 

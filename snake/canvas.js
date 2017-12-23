@@ -30,15 +30,21 @@ class Canvas {
         this.drawRect(x, y, w-1, h-1, color);
     }
 
-    clear(x, y, w, h) {
+    clear(x=0, y=0, w=this.w, h=this.h) {
         this.ctx.clearRect(x, y, w, h);
+    }
+
+    drawText(txt, x, y) {
+        this.ctx.fillStyle = '#09f';
+        this.ctx.font = '48px serif';
+        this.ctx.fillText(txt, x, y);
     }
 }
 
 
 const stage = new Canvas({
     parentId: 'container', 
-    bg: '#543'
+    bg: '#f2f2f2'
 });
 
 

@@ -10,7 +10,7 @@ const TILE_COLOR = '#ddd';
 const EVENT_INTERVAL = 100; // update move every 100ms
 
 export default class Game {
-    constructor(playerCount=2, width=40, height=40) {
+    constructor(playerCount=3, width=40, height=40) {
         this.id = guid();
         this._state = UNINITIALIZED;
         this.playerCount = playerCount;
@@ -26,7 +26,7 @@ export default class Game {
     onGameStart(difficulty) {
         this._difficulty = difficulty || 'easy';
         this.reset();
-        this.start();
+        this._countDown(3, this.start.bind(this));
     }
 
     onPaused() {
@@ -96,6 +96,22 @@ export default class Game {
         return [...this._foodGenerator].map( food => food.tile );
     }
 
+    _countDown(duration, cb) {
+        const that = this;
+        function count() {
+            if (duration <= 0) {
+                cb();
+                return;
+            }
+            duration--;
+            that._render();
+            stage.drawText(duration+1+'', 100, 100);
+            setTimeout(count, 1000);
+        }
+
+        count();
+    }
+
     _initialRender() {
         this._resetScreen();
         this._rasterize();
@@ -138,6 +154,7 @@ export default class Game {
     }
 
     _resetScreen() {
+        stage.clear();
         for (let i=0;i<this.h;i++) {
             for (let j=0;j<this.w;j++) {
                 this._screen[i][j] = TILE_COLOR;
@@ -169,8 +186,12 @@ export default class Game {
         for (let snake of this.snakes) {
             for (let i=0;i<snake.tiles.length;i++) {
                 const [x, y] = snake.tiles[i];
-                if (snake === this.snakes[0] && i === 0) {
-                    this._screen[x][y] = 'red';
+                if (snake === this.snakes[0] && i < 2) {
+                    if ( i === 0 ) {
+                        this._screen[x][y] = 'red';
+                    } else {
+                        this._screen[x][y] = 'orange';
+                    }
                 } else {
                     this._screen[x][y] = snake.color;
                 }

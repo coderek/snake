@@ -98,6 +98,7 @@ const scoreBoard = new Vue({
                     time: this.time,
                     efficiency: this.efficiency
                 }));
+            this.$forceUpdate();
         }
     }
 });
