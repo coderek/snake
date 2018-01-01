@@ -9,20 +9,25 @@ import { STARTED, UNINITIALIZED, GAME_OVER, GAME_SCORE } from '../shared/constan
 import { TILE_COLOR, EVENT_INTERVAL } from '../config.js';
 
 export default class Game {
-    constructor(playerCount=3, width=40, height=40) {
+    constructor(playerCount=1, aiCount=2, width=40, height=40) {
         this._state = UNINITIALIZED;
         this._screen = [];
         this._difficulty =  'easy';
         this._snakes = [];
         this._foodGenerator = null;
+        this._playerCount = playerCount;
+        this._aiCount = aiCount;
 
         this.id = guid();
-        this.playerCount = playerCount;
         this.height = height;
         this.width = width;
 
         _initPixels.call(this);
         _initialRender.call(this);
+    }
+
+    get snakes() {
+        return this._snakes;
     }
 
     onGameStart(difficulty) {
@@ -31,9 +36,10 @@ export default class Game {
         _countDown.call(this, 3, _start.bind(this));
     }
 
-    onKeyDown(k) {
-        if (this._snakes && this._snakes.length)
-            this._snakes[0].onKeyPressed(k.keyCode);
+    onKeyDown(sid, key) {
+        const snake = this._snakes.find(s=>s.id === sid);
+        if (snake) 
+            snake.onKeyPressed(key.keyCode);
     }
 
     /**
@@ -107,12 +113,13 @@ function _initSnakes() {
         this._snakes.forEach( s => s.dispose() );
     }
     this._snakes = [];
-    for (let i=0;i<this.playerCount;i++) {
-        if (i==0) {
-            this._snakes.push(new Snake(this));
-        } else {
-            this._snakes.push(AISnakeFactory(this));
-        }
+
+    for (let i=0;i<this._playerCount;i++) {
+        this._snakes.push(new Snake(this));
+    }
+
+    for (let i=0;i<this._aiCount;i++) {
+        this._snakes.push(AISnakeFactory(this));
     }
 }
 

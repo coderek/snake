@@ -3,6 +3,38 @@ import messageBus from '../shared/message.js';
 import ResultsManager from './results.js';
 import { GAME_START, GAME_OVER, GAME_SCORE } from '../shared/constants.js';
 import { NUM_OF_PERSONAL_BEST_TO_SHOW } from '../config.js';
+import Connection from './connection.js';
+
+let conn = null;
+
+const multiplayerView = new Vue({
+    el: '#multiplayer',
+    data: {
+        rooms: []
+    },
+    mounted() {
+        hide(this);
+        if (conn) conn.dispose();
+
+        conn = new Connection(rooms=>this.rooms=rooms);
+
+        conn.subscribe('message', (msg)=> {
+            console.log('received: ' + msg);
+        });
+    },
+    methods: {
+        createRoom() {
+            conn.createRoom(()=> this.showRoom());
+        },
+        join(room) {
+            conn.joinRoom(room, ()=> this.showRoom());
+        },
+        showRoom(r) {
+            conn.send('hello');
+            console.log('show room ' + r);
+        }
+    }
+});
 
 const startGame = new Vue({
     el: '#start-game',
@@ -20,6 +52,10 @@ const startGame = new Vue({
             );
             this.difficulty = difficulty;
             hide(this);
+        },
+        multiplayer() {
+            hide(this);
+            show(multiplayerView);
         }
     }
 });

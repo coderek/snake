@@ -2,10 +2,10 @@ import {camelize} from './util.js';
 const callbacks = new Map();
 
 export default {
-    broadcast(msg, payload) {
+    broadcast(msg, ...payload) {
         if ( callbacks.has(msg) ) {
             for (let cb of callbacks.get(msg)) {
-                cb.call(null, payload);
+                cb.call(null, ...payload);
             }
         }
     },

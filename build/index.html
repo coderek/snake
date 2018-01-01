@@ -63,6 +63,7 @@
                             <button @click="start('easy')">Easy</button>
                             <button @click="start('medium')">Medium</button>
                             <button @click="start('hard')">Hard</button>
+                            <button @click="multiplayer()">Multiplayer</button>
                         </div>
                     </div>
                 </div>
@@ -74,11 +75,25 @@
                         </div>
                     </div>
                 </div>
+                <div id="multiplayer" class="popup" v-cloak >
+                    <div class="row">
+                        <div class="col" style="width: 300px">
+                            <h3>Multiplayer</h3>
+                            <h4>Current rooms</h4>
+                            <div v-for="room of rooms">
+                                <button @click="join(room)">{{room}}</button>
+                            </div>
+                            <button>Create a room</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
 
 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/3.8.2/superagent.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vue"></script>
         <script src="/systemjs/dist/system-production.js"></script>
         <script>
