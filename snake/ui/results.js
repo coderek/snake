@@ -1,4 +1,4 @@
-import { NUM_OF_PERSONAL_BEST_TO_SHOW } from './config.js';
+import { NUM_OF_PERSONAL_BEST_TO_SHOW } from '../config.js';
 
 export default class ResultsManager {
     constructor() {

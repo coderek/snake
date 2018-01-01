@@ -1,8 +1,8 @@
-import './ui.js';
-import Game from './game.js';
-import { GAME_START, KEY_DOWN } from './constants.js';
-import messageBus from './message.js'; 
-import neonLightEffect from './text-effect.js';
+import './ui/ui.js';
+import Game from './core/game.js';
+import { GAME_START, KEY_DOWN } from './shared/constants.js';
+import messageBus from './shared/message.js'; 
+import neonLightEffect from './ui/text_effect.js';
 
 const game = new Game();
 

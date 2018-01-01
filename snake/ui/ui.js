@@ -1,8 +1,8 @@
 /* global Vue */
-import messageBus from './message.js'; 
+import messageBus from '../shared/message.js'; 
 import ResultsManager from './results.js';
-import { GAME_START, GAME_OVER, GAME_SCORE } from './constants.js';
-import { NUM_OF_PERSONAL_BEST_TO_SHOW } from './config.js';
+import { GAME_START, GAME_OVER, GAME_SCORE } from '../shared/constants.js';
+import { NUM_OF_PERSONAL_BEST_TO_SHOW } from '../config.js';
 
 const startGame = new Vue({
     el: '#start-game',

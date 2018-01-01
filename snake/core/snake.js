@@ -1,12 +1,7 @@
-import { guid, randInt, shuffle, range } from './util.js';
-import { Dead, NoMoveException } from './exceptions.js';
-import ReactiveArrayFactory from './reactive_array.js'; const dir = [-1, 0, 1, 0, -1];
-const KEYCODE = {
-    37: 3, // 'ArrowLeft',
-    38: 0, // 'ArrowUp',
-    39: 1, // 'ArrowRight',
-    40: 2, // 'ArrowDown',
-};
+import { guid, randInt, shuffle, range } from '../shared/util.js';
+import { Dead, NoMoveException } from '../shared/exceptions.js';
+import ReactiveArrayFactory from '../shared/reactive_array.js'; 
+import { DIR_KEYCODE, DIR_INDICES } from '../shared/constants.js';
 
 const COLORS = [
     '#0048BA',
@@ -19,19 +14,6 @@ const COLORS = [
 
 const _tileMap = {};
 const tileHash = (x, y) => x * 100000000 + y;
-
-function TileMapFactory( sid ) {
-    const additionCallback = el => _tileMap[tileHash(...el)] = sid;
-    const removalCallback = el => delete _tileMap[tileHash(...el)];
-
-    return ReactiveArrayFactory({
-        push: additionCallback,
-        unshift: additionCallback,
-        pop: {
-            post: removalCallback
-        }
-    });
-}
 
 let seq = 0;
 
@@ -92,7 +74,7 @@ export class Snake {
 
     _getRandDir(sx, sy) {
         for (let i of shuffle(range(4))) {
-            const [nx, ny] = [sx + dir[i], sy + dir[i+1]];
+            const [nx, ny] = [sx + DIR_INDICES[i], sy + DIR_INDICES[i+1]];
             if (this._isValidMove(nx, ny))
                 return i;
         }
@@ -127,7 +109,7 @@ export class Snake {
         if (this._keyPressed == null && this._lastDir == null) {
             d = this._lastDir = this._getDir(this._tiles[1], this._tiles[0]);
         } else if (this._keyPressed != null) {
-            d = KEYCODE[this._keyPressed];
+            d = DIR_KEYCODE[this._keyPressed];
             // do nothing when it's towards the opposite direction
             if (this._lastDir == null || (this._lastDir + d) % 2 === 1) {
                 this._lastDir = d;
@@ -140,7 +122,7 @@ export class Snake {
             d = this._lastDir;
         }
 
-        const [nx, ny] = [sx + dir[d], sy + dir[d+1]];
+        const [nx, ny] = [sx + DIR_INDICES[d], sy + DIR_INDICES[d+1]];
         if (this._isValidMove(nx, ny)) {
             return [nx, ny];
         }
@@ -153,7 +135,7 @@ export class Snake {
         for (let i=0;i<this._len;i++) {
             this._tiles.push([sx, sy]);
             const d = this._getRandDir(sx, sy);
-            [sx, sy] = [sx + dir[d], sy + dir[d+1]];
+            [sx, sy] = [sx + DIR_INDICES[d], sy + DIR_INDICES[d+1]];
         }
 
         this._tiles.push([sx, sy]);
@@ -196,7 +178,7 @@ class AISnake extends Snake {
             }
         }
         for (let i of moves) {
-            const [nx, ny] = [x + dir[i], y + dir[i+1]];
+            const [nx, ny] = [x + DIR_INDICES[i], y + DIR_INDICES[i+1]];
             if (this._isValidMove(nx, ny))
                 return i;
         }
@@ -216,7 +198,7 @@ class AISnake extends Snake {
                 const p = q.shift();
                 const [fx, fy] = p;
                 for (let i=0;i<4;i++) {
-                    const [nx, ny] = [fx+dir[i], fy+dir[i+1]];
+                    const [nx, ny] = [fx+DIR_INDICES[i], fy+DIR_INDICES[i+1]];
                     const hash = tileHash(nx, ny);
                     if (visited.has(hash)) {
                         continue;
@@ -245,7 +227,7 @@ class AISnake extends Snake {
         } else {
             d = this._patrol(sx, sy);
         }
-        const coords = [sx + dir[d], sy + dir[d+1]];
+        const coords = [sx + DIR_INDICES[d], sy + DIR_INDICES[d+1]];
         if (this._isValidMove(...coords) && this._isSmartMove(...coords)) {
             return coords;
         } else {
@@ -298,3 +280,18 @@ export function AISnakeFactory(game) {
         return new HardSnake(game);
     }
 }
+
+// private methods
+function TileMapFactory( sid ) {
+    const additionCallback = el => _tileMap[tileHash(...el)] = sid;
+    const removalCallback = el => delete _tileMap[tileHash(...el)];
+
+    return ReactiveArrayFactory({
+        push: additionCallback,
+        unshift: additionCallback,
+        pop: {
+            post: removalCallback
+        }
+    });
+}
+

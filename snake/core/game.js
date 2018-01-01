@@ -27,9 +27,8 @@ export default class Game {
 
     onGameStart(difficulty) {
         this._difficulty = difficulty;
-        this.reset();
-
-        _countDown.call(this, 3, this.start.bind(this));
+        _reset.call(this);
+        _countDown.call(this, 3, _start.bind(this));
     }
 
     onKeyDown(k) {
@@ -37,6 +36,9 @@ export default class Game {
             this._snakes[0].onKeyPressed(k.keyCode);
     }
 
+    /**
+     * Pick a random empty tile on the map
+     */
     getRandomEmptyPixel() {
         const x = randInt(this.height);
         const emptyPixels = this._screen[x]
@@ -46,49 +48,16 @@ export default class Game {
         return [x, randomPixel[1]];
     }
 
+    /**
+     * Return if the given (x,y) is inside the game boundary
+     */
     isInScreen(x, y) {
-        return 0<=x && x<this.height && 0<=y && y<this.w;
+        return 0<=x && x<this.height && 0<=y && y<this.width;
     }
 
-    tick(time) {
-        _move.call(this);
-        this._foodGenerator.generate();
-    }
-
-    start() {
-        this._state = STARTED;
-        const loop = (time) => {
-            if ( !this._lastUpdate || time - this._lastUpdate > EVENT_INTERVAL ) {
-                try {
-                    this.tick(time);
-                } catch (e) {
-                    if ( e instanceof GameOver ) {
-                        _render.call(this);
-                        this.finish();
-                        return;
-                    }
-                }
-                this._lastUpdate = time;
-            }
-            _render.call(this);
-            requestAnimationFrame(loop);
-        };
-        loop();
-    }
-
-    finish() {
-        messageBus.broadcast(GAME_OVER, {
-            id: this.id,
-            difficulty: this._difficulty
-        });
-    }
-
-    reset() {
-        _initPixels.call(this);
-        _initSnakes.call(this);
-        _initFoodGenerator.call(this);
-    }
-
+    /**
+     * Return coordinates of all the foods on the map
+     */
     foodCoords() {
         return [...this._foodGenerator].map( food => food.tile );
     }
@@ -114,8 +83,8 @@ function _countDown(duration, cb) {
 }
 
 function _initialRender() {
-    this._resetScreen();
-    this._rasterize();
+    _resetScreen.call(this);
+    _rasterize.call(this);
 }
 
 
@@ -129,20 +98,20 @@ function _initFoodGenerator() {
 
 function _initPixels() {
     for (let i=0;i<this.height;i++) {
-        this._screen.push(Array(this.w).fill(TILE_COLOR));
+        this._screen.push(Array(this.width).fill(TILE_COLOR));
     }
 }
 
 function _initSnakes() {
-    if (this.snakes && this.snakes.length) {
-        this.snakes.forEach( s => s.dispose() );
+    if (this._snakes && this._snakes.length) {
+        this._snakes.forEach( s => s.dispose() );
     }
-    this.snakes = [];
+    this._snakes = [];
     for (let i=0;i<this.playerCount;i++) {
         if (i==0) {
-            this.snakes.push(new Snake(this));
+            this._snakes.push(new Snake(this));
         } else {
-            this.snakes.push(AISnakeFactory(this));
+            this._snakes.push(AISnakeFactory(this));
         }
     }
 }
@@ -158,9 +127,9 @@ function _render() {
 }
 
 function _move() {
-    for (let snake of this.snakes) {
+    for (let snake of this._snakes) {
         if (snake.isDead) {
-            if (snake === this.snakes[0]) {
+            if (snake === this._snakes[0]) {
                 throw new GameOver();
             }
             continue;
@@ -176,7 +145,7 @@ function _move() {
 
         if (_eatFood.call(this, x, y)) {
             snake.grow();
-            if (snake === this.snakes[0]) {
+            if (snake === this._snakes[0]) {
                 messageBus.broadcast(GAME_SCORE);
             }
         }
@@ -187,7 +156,7 @@ function _move() {
 function _resetScreen() {
     stage.clear();
     for (let i=0;i<this.height;i++) {
-        for (let j=0;j<this.w;j++) {
+        for (let j=0;j<this.width;j++) {
             this._screen[i][j] = TILE_COLOR;
         }
     }
@@ -199,8 +168,8 @@ function _rasterize() {
 
     for (let i=0;i<this.height;i++) {
         const ii = i/this.height;
-        for (let j=0;j<this.w;j++) {
-            const jj = j/this.w;
+        for (let j=0;j<this.width;j++) {
+            const jj = j/this.width;
             stage.drawRectPercent(jj, ii, h, w, this._screen[i][j]);
         }
     }
@@ -214,10 +183,10 @@ function _renderFoods() {
 }
 
 function _renderSnakes() {
-    for (let snake of this.snakes) {
+    for (let snake of this._snakes) {
         for (let i=0;i<snake.tiles.length;i++) {
             const [x, y] = snake.tiles[i];
-            if (snake === this.snakes[0] && i < 2) {
+            if (snake === this._snakes[0] && i < 2) {
                 if ( i === 0 ) {
                     this._screen[x][y] = 'red';
                 } else {
@@ -232,5 +201,44 @@ function _renderSnakes() {
 
 function _eatFood(x, y) {
     return this._foodGenerator.eat(x, y);
+}
+
+function _tick() {
+    _move.call(this);
+    this._foodGenerator.generate();
+}
+
+function _finish() {
+    messageBus.broadcast(GAME_OVER, {
+        id: this.id,
+        difficulty: this._difficulty
+    });
+}
+
+function _start() {
+    this._state = STARTED;
+    const loop = (time) => {
+        if ( !this._lastUpdate || time - this._lastUpdate > EVENT_INTERVAL ) {
+            try {
+                _tick.call(this, time);
+            } catch (e) {
+                if ( e instanceof GameOver ) {
+                    _render.call(this);
+                    _finish.call(this);
+                    return;
+                }
+            }
+            this._lastUpdate = time;
+        }
+        _render.call(this);
+        requestAnimationFrame(loop);
+    };
+    loop();
+}
+
+function _reset() {
+    _initPixels.call(this);
+    _initSnakes.call(this);
+    _initFoodGenerator.call(this);
 }
 
