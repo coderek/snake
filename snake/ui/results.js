@@ -1,4 +1,3 @@
-import ReactiveArrayFactory from './reactive_array.js';
 import { NUM_OF_PERSONAL_BEST_TO_SHOW } from './config.js';
 
 export default class ResultsManager {
@@ -26,7 +25,7 @@ export default class ResultsManager {
     _sortedRecords(rds) {
         return rds.sort((a,b)=> {
             if (b.score - a.score !== 0 ) {
-                return b.score - a.score
+                return b.score - a.score;
             }
             if (a.time - b.time !== 0) {
                 return a.time - b.time;

@@ -1,4 +1,3 @@
-import { STARTED, UNINITIALIZED, PAUSED, FINISHED } from './constants.js';
 import { guid, randInt, shuffle, range } from './util.js';
 import { Dead, NoMoveException } from './exceptions.js';
 import ReactiveArrayFactory from './reactive_array.js'; const dir = [-1, 0, 1, 0, -1];
@@ -93,7 +92,7 @@ export class Snake {
 
     _getRandDir(sx, sy) {
         for (let i of shuffle(range(4))) {
-            const [nx, ny] = [sx + dir[i], sy + dir[i+1]]
+            const [nx, ny] = [sx + dir[i], sy + dir[i+1]];
             if (this._isValidMove(nx, ny))
                 return i;
         }
@@ -107,7 +106,7 @@ export class Snake {
     _getDir(from, to) {
         // from and to are connected and not overlap
         const [fx, fy] = from;
-        const [tx, ty] = to;
+        const [tx] = to;
         if (fx === tx) {
             if (fy > tx) {
                 return 3;
@@ -149,7 +148,7 @@ export class Snake {
     }
 
     _init() {
-        let [sx, sy] = [randInt(this._game.h), randInt(this._game.w)];
+        let [sx, sy] = [randInt(this._game.height), randInt(this._game.width)];
 
         for (let i=0;i<this._len;i++) {
             this._tiles.push([sx, sy]);
@@ -162,14 +161,10 @@ export class Snake {
 
 }
 
-const AI_STATE_PATROL = '_patrol';
-const AI_STATE_ATTACK = '_attack';
-const AI_STATE_RACE = '_race';
-
 class AISnake extends Snake {
 
     // return dir
-    _patrol(x, y) {
+    _patrol() {
         if (!this._patrolSteps || this._patrolSteps.length === 0) {
             const d = randInt(4);
             const rep = randInt(10);
@@ -201,7 +196,7 @@ class AISnake extends Snake {
             }
         }
         for (let i of moves) {
-            const [nx, ny] = [x + dir[i], y + dir[i+1]]
+            const [nx, ny] = [x + dir[i], y + dir[i+1]];
             if (this._isValidMove(nx, ny))
                 return i;
         }
@@ -210,7 +205,7 @@ class AISnake extends Snake {
 
     _isSmartMove(x, y) {
         const selfLen = this._tiles.length;
-        const borders = new Set();
+        // const borders = new Set();
         const visited = new Set();
         const q = [[x, y]];
 
@@ -281,7 +276,7 @@ class MediumSnake extends AISnake {
     constructor() {
         super(...arguments);
         console.log('Easy AI snake');
-        this._nearByThreshold = this._game.h / 2;
+        this._nearByThreshold = this._game.height / 2;
     }
 }
 
@@ -295,11 +290,11 @@ class EasySnake extends AISnake {
 
 export function AISnakeFactory(game) {
     switch (game._difficulty)  {
-        case 'easy':
-            return new EasySnake(game);
-        case 'medium':
-            return new MediumSnake(game);
-        case 'hard':
-            return new HardSnake(game);
+    case 'easy':
+        return new EasySnake(game);
+    case 'medium':
+        return new MediumSnake(game);
+    case 'hard':
+        return new HardSnake(game);
     }
-};
+}

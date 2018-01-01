@@ -1,4 +1,3 @@
-
 class Food {
     constructor(x, y) {
         this.tile = [x, y];
@@ -8,7 +7,7 @@ class Food {
 class Apple extends Food {
     constructor() {
         super(...arguments);
-        this.color = "green";
+        this.color = 'green';
     }
 }
 
@@ -29,6 +28,10 @@ export default class FoodGenertor {
         return this._current.values();
     }
 
+    /**
+     * given x and y return if it matches one of the foods
+     * if it matches, that food will be removed
+     */
     eat(x, y) {
         let eaten = null;
         for (let [key, food] of this._current.entries()) {

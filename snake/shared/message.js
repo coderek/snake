@@ -18,4 +18,4 @@ export default {
             callbacks.get(msg).push(obj[method].bind(obj));
         }
     }
-}
+};
